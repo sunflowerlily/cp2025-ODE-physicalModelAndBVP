@@ -9,8 +9,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Attempt to import student's functions
 try:
-    from project_1_student import (
-    #from solution.solution import (
+    from double_pendulum_simulation_student import (
+    #from solution.double_pendulum_simulation_solution import (
         derivatives,
         solve_double_pendulum,
         calculate_energy,
@@ -218,13 +218,13 @@ class TestDoublePendulum(unittest.TestCase):
 
 if __name__ == '__main__':
     # You can run the tests from the command line using:
-    # python -m unittest test_project_1.py
-    # Ensure that project_1_student.py is in the same directory or accessible via PYTHONPATH.
+    # python -m unittest test_double_pendulum_simulation.py
+# Ensure that double_pendulum_simulation_student.py is in the same directory or accessible via PYTHONPATH.
     
     # For GitHub Classroom autograding, the runner will discover and run tests.
     # This block is mainly for local testing convenience.
     if not STUDENT_FUNCTIONS_IMPORTED:
         print("Failed to import student functions. Tests will likely fail or be skipped.")
-        print("Ensure 'project_1_student.py' is in the same directory as 'test_project_1.py' or in PYTHONPATH.")
+        print("Ensure 'double_pendulum_simulation_student.py' is in the same directory as 'test_double_pendulum_simulation.py' or in PYTHONPATH.")
     
     unittest.main(verbosity=2)
