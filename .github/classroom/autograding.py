@@ -14,16 +14,16 @@ from pathlib import Path
 TESTS = [
     {"name": "项目一: 有限差分法求解边值问题", 
      "file": "PROJECT_1_FiniteDifferenceBVP/tests/test_finite_difference_bvp.py", 
-     "points": 25},
+     "points": 10},
     {"name": "项目二: 打靶法求解边值问题", 
      "file": "PROJECT_2_ShootingMethod/tests/test_shooting_method.py", 
-     "points": 25},
+     "points": 10},
     {"name": "项目三: 平方反比定律运动模拟", 
      "file": "PROJECT_3_InverseSquareLawMotion/tests/test_inverse_square_law_motion.py", 
-     "points": 25},
+     "points": 10},
     {"name": "项目四: 双摆系统仿真", 
      "file": "PROJECT_4_DoublePendulumSimulation/tests/test_double_pendulum_simulation.py", 
-     "points": 25}
+     "points": 10}
 ]
 
 def run_test(test_file):

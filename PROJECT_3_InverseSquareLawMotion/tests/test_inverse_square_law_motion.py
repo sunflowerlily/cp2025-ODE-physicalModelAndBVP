@@ -17,12 +17,10 @@ import os
 SOLUTION_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'solution'))
 STUDENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-# Attempt to import solution, then student code
-# This structure allows testing the solution first, then adapting for student tests.
-# For autograding, the student import path will be primary.
+# For autograding, we should test STUDENT code, not solution code
+# Only import student code for actual grading
 
-# Placeholder for functions if solution/student module is not found or has errors
-# This helps in defining the test structure even if the import fails initially.
+# Placeholder for functions if student module is not found or has errors
 def solve_orbit_placeholder(*args, **kwargs):
     raise NotImplementedError("solve_orbit is not implemented or import failed.")
 
@@ -37,50 +35,44 @@ def derivatives_placeholder(*args, **kwargs):
 
 GM_default = 1.0
 
+# Import student code for grading
 try:
-    sys.path.insert(0, SOLUTION_PATH)
-    from inverse_square_law_motion_solution import (
-        solve_orbit as solution_solve_orbit,
-        calculate_energy as solution_calculate_energy,
-        calculate_angular_momentum as solution_calculate_angular_momentum,
-        derivatives as solution_derivatives,
-        GM as SOLUTION_GM
+    sys.path.insert(0, STUDENT_PATH)
+    from inverse_square_law_motion_student import (
+        solve_orbit as student_solve_orbit,
+        calculate_energy as student_calculate_energy,
+        calculate_angular_momentum as student_calculate_angular_momentum,
+        derivatives as student_derivatives,
     )
-    # Use solution functions for initial test development and validation
-    solve_orbit_to_test = solution_solve_orbit
-    calculate_energy_to_test = solution_calculate_energy
-    calculate_angular_momentum_to_test = solution_calculate_angular_momentum
-    derivatives_to_test = solution_derivatives
-    GM_tested = SOLUTION_GM
-    print(f"Successfully imported from SOLUTION: {SOLUTION_PATH}")
+    solve_orbit_to_test = student_solve_orbit
+    calculate_energy_to_test = student_calculate_energy
+    calculate_angular_momentum_to_test = student_calculate_angular_momentum
+    derivatives_to_test = student_derivatives
+    GM_tested = GM_default
+    print(f"Successfully imported from STUDENT: {STUDENT_PATH}")
 except ImportError as e:
-    print(f"Could not import from solution: {e}")
-    print("Falling back to student's version or placeholders for test structure.")
-    # Fallback for student testing - this part will be active in GitHub Classroom
-    try:
-        sys.path.insert(0, STUDENT_PATH) # Ensure student's directory is in path
-        from inverse_square_law_motion_student import (
-            solve_orbit as student_solve_orbit,
-            calculate_energy as student_calculate_energy,
-            calculate_angular_momentum as student_calculate_angular_momentum,
-            derivatives as student_derivatives,
-            # GM as STUDENT_GM # Student might not define GM globally, or it might be a parameter
-        )
-        solve_orbit_to_test = student_solve_orbit
-        calculate_energy_to_test = student_calculate_energy
-        calculate_angular_momentum_to_test = student_calculate_angular_momentum
-        derivatives_to_test = student_derivatives
-        # GM_tested = STUDENT_GM # Or pass GM as a parameter if student's code expects it
-        GM_tested = GM_default # Assume student uses a passed GM or a local one matching default
-        print(f"Successfully imported from STUDENT: {STUDENT_PATH}")
-    except ImportError as e_stud:
-        print(f"Could not import from student: {e_stud}")
-        print("Using placeholders. Tests will likely fail due to NotImplementedError.")
-        solve_orbit_to_test = solve_orbit_placeholder
-        calculate_energy_to_test = calculate_energy_placeholder
-        calculate_angular_momentum_to_test = calculate_angular_momentum_placeholder
-        derivatives_to_test = derivatives_placeholder
-        GM_tested = GM_default
+    print(f"Could not import from student: {e}")
+    print("Using placeholders. Tests will fail due to NotImplementedError.")
+    solve_orbit_to_test = solve_orbit_placeholder
+    calculate_energy_to_test = calculate_energy_placeholder
+    calculate_angular_momentum_to_test = calculate_angular_momentum_placeholder
+    derivatives_to_test = derivatives_placeholder
+    GM_tested = GM_default
+
+# Optional: Import solution for validation (only for development/debugging)
+# This should be commented out or removed for actual student grading
+# try:
+#     sys.path.insert(0, SOLUTION_PATH)
+#     from inverse_square_law_motion_solution import (
+#         solve_orbit as solution_solve_orbit,
+#         calculate_energy as solution_calculate_energy,
+#         calculate_angular_momentum as solution_calculate_angular_momentum,
+#         derivatives as solution_derivatives,
+#         GM as SOLUTION_GM
+#     )
+#     print(f"Solution also available for validation: {SOLUTION_PATH}")
+# except ImportError:
+#     print("Solution not available (this is normal for student grading)")
 
 class TestInverseSquareLawMotion(unittest.TestCase):
     def setUp(self):
@@ -216,31 +208,14 @@ class TestInverseSquareLawMotion(unittest.TestCase):
         except Exception as e:
             self.fail(f"Hyperbolic orbit test raised an unexpected error: {e}")
 
-    # This is a validation test for the reference solution, not for student grading directly.
-    # It ensures the test suite itself is consistent with the reference solution.
-    @unittest.skipIf(solve_orbit_to_test == solve_orbit_placeholder or solve_orbit_to_test == student_solve_orbit if 'student_solve_orbit' in globals() else True,
-                     "Skipping reference solution validation if solution not loaded or student code is primary.")
+    # Reference solution validation test is disabled for student grading
+    # This test would only be used during development to validate the test suite itself
+    @unittest.skip("Reference solution validation disabled for student grading")
     def test_reference_solution_passes_all_checks(self):
         """Internal check: Ensure reference solution passes its own tests (0 points - validation)."""
-        # This test re-runs some checks assuming the 'solution_*' functions are loaded.
-        # This is more of a sanity check for the test developer.
-        # For actual grading, the points are in individual test methods.
-        self.gm = SOLUTION_GM # Ensure using solution's GM
-        
-        # Re-run a circular orbit check with solution functions directly
-        r0 = 1.0
-        v0 = np.sqrt(self.gm / r0)
-        initial_conditions = [r0, 0.0, 0.0, v0]
-        t_end = 2 * np.pi * r0 / v0 # One period
-        t_eval = np.linspace(self.t_start, t_end, self.n_points)
-        
-        sol = solution_solve_orbit(initial_conditions, (self.t_start, t_end), t_eval, gm_val=self.gm)
-        states = sol.y.T
-        energies = solution_calculate_energy(states, self.gm, self.mass_particle)
-        angular_momenta = solution_calculate_angular_momentum(states, self.mass_particle)
-        
-        np.testing.assert_allclose(energies, energies[0], rtol=1e-6, atol=1e-8, err_msg="Ref Solution: Energy not conserved.")
-        np.testing.assert_allclose(angular_momenta, angular_momenta[0], rtol=1e-6, atol=1e-8, err_msg="Ref Solution: Ang. Mom. not conserved.")
+        # This test is skipped during student grading
+        # It would only be used during development to validate the test suite
+        pass
 
 if __name__ == '__main__':
     # This allows running the tests from the command line
