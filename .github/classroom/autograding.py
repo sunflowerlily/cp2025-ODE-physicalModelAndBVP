@@ -1,59 +1,75 @@
 #!/usr/bin/env python3
-"""Automated grading script for GitHub Classroom for BVP Project."""
+"""Automated grading script for GitHub Classroom for ODE Physical Model and BVP Projects."""
 import os
 import sys
 import json
 import unittest
+import importlib.util
 from io import StringIO
 
-# Ensure the project's test directory can be found if script is run from .github/classroom
-# This assumes the tests are in a structure like: WEEK_X_TOPIC/PROJECT_Y_NAME/tests/
-# And this script is in WEEK_X_TOPIC/.github/classroom/
-# We need to go up two levels from .github/classroom to reach WEEK_X_TOPIC,
-# then into the specific project and its tests.
+# Project configuration
+PROJECTS = [
+    {
+        "name": "PROJECT_1_FiniteDifferenceBVP",
+        "test_module": "test_finite_difference_bvp",
+        "test_class": "TestStudentImplementation"
+    },
+    {
+        "name": "PROJECT_2_ShootingMethod", 
+        "test_module": "test_shooting_method",
+        "test_class": "TestStudentImplementation"
+    },
+    {
+        "name": "PROJECT_3_InverseSquareLawMotion",
+        "test_module": "test_inverse_square_law_motion", 
+        "test_class": "TestStudentImplementation"
+    },
+    {
+        "name": "PROJECT_4_DoublePendulumSimulation",
+        "test_module": "test_double_pendulum_simulation",
+        "test_class": "TestStudentImplementation"
+    }
+]
 
-# Determine the project name dynamically or set it if fixed
-# For this specific BVP project, it's PROJECT_1_SolveBVP
-PROJECT_NAME = "PROJECT_1_SolveBVP"
-PROJECT_BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')) # WEEK_X_TOPIC
-TEST_DIR = os.path.join(PROJECT_BASE_DIR, PROJECT_NAME, 'tests')
+PROJECT_BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))  # Root directory
 
-if not os.path.isdir(TEST_DIR):
-    # Fallback if running from a different context (e.g. project root)
-    # This might happen if autograding.json calls python .github/classroom/autograding.py
-    # from the root of the student's repository.
-    CURRENT_WORKING_DIR = os.getcwd()
-    PROBABLE_PROJECT_DIR = os.path.join(CURRENT_WORKING_DIR, PROJECT_NAME)
-    PROBABLE_TEST_DIR = os.path.join(PROBABLE_PROJECT_DIR, 'tests')
-    if os.path.isdir(PROBABLE_TEST_DIR):
-        TEST_DIR = PROBABLE_TEST_DIR
-        # Add student's project root and solution path (if needed by tests for imports)
-        sys.path.insert(0, PROBABLE_PROJECT_DIR) # For student's code
-        sys.path.insert(0, os.path.join(PROBABLE_PROJECT_DIR, 'solution')) # For solution code
-    else:
-        # If still not found, print an error and exit, as tests cannot be run.
-        print(f"Error: Test directory not found. Expected at {TEST_DIR} or {PROBABLE_TEST_DIR}")
-        # Output a valid JSON for GitHub Classroom to indicate failure
-        print(json.dumps({"tests": [], "feedback": "Autograder setup error: Test directory not found.", "status": "error"}))
-        sys.exit(1)
-else:
-    # Add student's project root and solution path (if needed by tests for imports)
-    sys.path.insert(0, os.path.join(PROJECT_BASE_DIR, PROJECT_NAME)) # For student's code
-    sys.path.insert(0, os.path.join(PROJECT_BASE_DIR, PROJECT_NAME, 'solution')) # For solution code
-
-# Now try to import the test module
-# The test file is assumed to be test_solve_bvp.py
-TEST_MODULE_NAME = "test_solve_bvp"
-
-try:
-    # Add TEST_DIR to sys.path so 'import test_solve_bvp' works
-    sys.path.insert(0, TEST_DIR)
-    import test_solve_bvp
-except ImportError as e:
-    print(f"Error: Could not import test module '{TEST_MODULE_NAME}' from {TEST_DIR}. Exception: {e}")
-    # Output a valid JSON for GitHub Classroom
-    print(json.dumps({"tests": [], "feedback": f"Autograder setup error: Could not import test module. {e}", "status": "error"}))
-    sys.exit(1)
+def load_test_module(project_config):
+    """Load test module for a specific project."""
+    project_name = project_config["name"]
+    test_module_name = project_config["test_module"]
+    
+    # Determine project directory
+    project_dir = os.path.join(PROJECT_BASE_DIR, project_name)
+    test_dir = os.path.join(project_dir, 'tests')
+    
+    # Check if project exists
+    if not os.path.isdir(project_dir):
+        return None, f"Project directory not found: {project_dir}"
+    
+    if not os.path.isdir(test_dir):
+        return None, f"Test directory not found: {test_dir}"
+    
+    # Add paths for imports
+    if project_dir not in sys.path:
+        sys.path.insert(0, project_dir)
+    if os.path.join(project_dir, 'solution') not in sys.path:
+        sys.path.insert(0, os.path.join(project_dir, 'solution'))
+    if test_dir not in sys.path:
+        sys.path.insert(0, test_dir)
+    
+    # Try to import the test module
+    try:
+        test_module_path = os.path.join(test_dir, f"{test_module_name}.py")
+        if not os.path.exists(test_module_path):
+            return None, f"Test file not found: {test_module_path}"
+        
+        spec = importlib.util.spec_from_file_location(test_module_name, test_module_path)
+        test_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(test_module)
+        
+        return test_module, None
+    except Exception as e:
+        return None, f"Could not import test module '{test_module_name}': {e}"
 
 class PointsTestResult(unittest.TextTestResult):
     """A test result class that collects points based on test method names."""
@@ -127,17 +143,17 @@ class AutoGrader:
         self.total_score = 0
         self.max_score = 0
 
-    def run_project_tests(self):
+    def run_project_tests(self, test_module, test_class_name):
         """Run tests for the specified project and collect results."""
         # Discover and run tests from the imported test module
         loader = unittest.TestLoader()
-        # Load tests only from TestStudentImplementation class
+        
         try:
-            suite = loader.loadTestsFromTestCase(test_solve_bvp.TestStudentImplementation)
+            # Get the test class from the module
+            test_class = getattr(test_module, test_class_name)
+            suite = loader.loadTestsFromTestCase(test_class)
         except AttributeError as e:
-            # This can happen if TestStudentImplementation is not defined in the test file
-            # (e.g., if student code or solution code failed to import in test_solve_bvp.py)
-            self.results_data["feedback"] = f"Autograder error: Could not load student tests. Test class 'TestStudentImplementation' might be missing or not loadable due to import errors in the test file itself. Details: {e}"
+            self.results_data["feedback"] = f"Autograder error: Could not load test class '{test_class_name}' from test module. Details: {e}"
             self.results_data["status"] = "error"
             return
         except Exception as e:
@@ -146,43 +162,83 @@ class AutoGrader:
             return
 
         if suite.countTestCases() == 0:
-            # This might happen if student code is not available and tests are skipped by @unittest.skipIf
-            # Or if the TestStudentImplementation class has no test methods.
-            self.results_data["feedback"] = "No student tests were found or run. This might be due to missing student code, or the test class 'TestStudentImplementation' having no tests, or all tests being skipped."
+            self.results_data["feedback"] = f"No tests were found in class '{test_class_name}'. This might be due to missing student code or all tests being skipped."
             # Check if student code was actually available according to the test file's own checks
-            if hasattr(test_solve_bvp, 'STUDENT_CODE_AVAILABLE') and not test_solve_bvp.STUDENT_CODE_AVAILABLE:
+            if hasattr(test_module, 'STUDENT_CODE_AVAILABLE') and not test_module.STUDENT_CODE_AVAILABLE:
                  self.results_data["feedback"] += " The test file indicated that the student's code module could not be imported."
             self.results_data["status"] = "success" # Not an error, but 0 points
             return
 
-        # Use a custom TestResult class to capture points
-        # Redirect stdout to capture test runner output if needed, though PointsTestResult captures errors.
-        # string_io = StringIO()
-        # runner = unittest.TextTestRunner(stream=string_io, resultclass=PointsTestResult, verbosity=2)
-        
         # Create an instance of our custom result class
         test_result_collector = PointsTestResult(stream=sys.stderr, descriptions=True, verbosity=2)
         
         suite.run(result=test_result_collector)
 
-        self.total_score = test_result_collector.total_points_earned
-        self.max_score = test_result_collector.total_points_possible
-        self.results_data["tests"] = test_result_collector.detailed_results
+        self.total_score += test_result_collector.total_points_earned
+        self.max_score += test_result_collector.total_points_possible
+        self.results_data["tests"].extend(test_result_collector.detailed_results)
         
+        # Update status if there are failures or errors
+        if test_result_collector.errors or test_result_collector.failures:
+            self.results_data["status"] = "failure"
+    
+    def run_all_projects(self):
+        """Run tests for all available projects."""
+        project_results = []
+        
+        for project_config in PROJECTS:
+            project_name = project_config["name"]
+            test_module, error = load_test_module(project_config)
+            
+            if test_module is None:
+                # Project not available or has errors
+                project_results.append({
+                    "project": project_name,
+                    "status": "skipped",
+                    "reason": error
+                })
+                continue
+            
+            # Run tests for this project
+            try:
+                self.run_project_tests(test_module, project_config["test_class"])
+                project_results.append({
+                    "project": project_name,
+                    "status": "completed"
+                })
+            except Exception as e:
+                project_results.append({
+                    "project": project_name,
+                    "status": "error",
+                    "reason": str(e)
+                })
+        
+        # Generate final feedback
         feedback_lines = [
-            f"Grading for project: {self.project_name}",
-            f"Total score: {self.total_score} / {self.max_score} points."
+            "=== ODE Physical Model and BVP Projects Grading Report ===",
+            f"Total score: {self.total_score} / {self.max_score} points.",
+            ""
         ]
-        if test_result_collector.wasSuccessful() and self.max_score > 0:
-            feedback_lines.append("All graded tests passed!")
+        
+        # Add project-by-project summary
+        for result in project_results:
+            if result["status"] == "completed":
+                feedback_lines.append(f"✓ {result['project']}: Tests completed")
+            elif result["status"] == "skipped":
+                feedback_lines.append(f"- {result['project']}: Skipped ({result['reason']})")
+            else:
+                feedback_lines.append(f"✗ {result['project']}: Error ({result['reason']})")
+        
+        feedback_lines.append("")
+        
+        if self.total_score == self.max_score and self.max_score > 0:
+            feedback_lines.append("🎉 All available tests passed!")
         elif self.max_score == 0:
-             feedback_lines.append("No points were assigned to the tests that ran. Check test naming convention (e.g., test_method_Xpts)." )
+            feedback_lines.append("⚠️  No tests were run or no points were assigned.")
         else:
-            feedback_lines.append("Some tests failed. See details above or in the 'Checks' tab.")
+            feedback_lines.append("📊 Some tests failed. See details above or in the 'Checks' tab.")
         
         self.results_data["feedback"] = "\n".join(feedback_lines)
-        if test_result_collector.errors or test_result_collector.failures:
-            self.results_data["status"] = "failure" # Partial success or failure
 
     def generate_report(self):
         """Generate JSON report for GitHub Classroom."""
@@ -206,9 +262,9 @@ if __name__ == "__main__":
     # This script is intended to be run by GitHub Classroom's autograding environment.
     # It should output a JSON object to stdout that GitHub Classroom can parse.
     
-    grader = AutoGrader(project_name=PROJECT_NAME)
+    grader = AutoGrader(project_name="ODE_Physical_Model_and_BVP_Projects")
     try:
-        grader.run_project_tests()
+        grader.run_all_projects()
     except Exception as e:
         # Catch-all for unexpected errors during the grading process itself
         grader.results_data["feedback"] = f"A critical error occurred during autograding: {e}. Please contact the instructor."
