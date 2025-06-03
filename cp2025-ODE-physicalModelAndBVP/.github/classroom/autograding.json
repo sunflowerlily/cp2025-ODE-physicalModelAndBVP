@@ -1,0 +1,214 @@
+{
+  "tests": [
+    {
+      "name": "Project 1: Finite Difference Implementation",
+      "setup": "pip install -r requirements.txt",
+      "run": "python -m unittest PROJECT_1_FiniteDifferenceBVP.tests.test_finite_difference_bvp.TestSolveBVPFiniteDifference.test_finite_difference_basic_10pts",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 10
+    },
+    {
+      "name": "Project 1: ODE System Implementation",
+      "setup": "pip install -r requirements.txt",
+      "run": "python -m unittest PROJECT_1_FiniteDifferenceBVP.tests.test_finite_difference_bvp.TestSolveBVPFiniteDifference.test_ode_system_5pts",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 5
+    },
+    {
+      "name": "Project 1: Boundary Conditions",
+      "setup": "pip install -r requirements.txt",
+      "run": "python -m unittest PROJECT_1_FiniteDifferenceBVP.tests.test_finite_difference_bvp.TestSolveBVPFiniteDifference.test_boundary_conditions_5pts",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 5
+    },
+    {
+      "name": "Project 1: scipy.solve_bvp Wrapper",
+      "setup": "",
+      "run": "cd PROJECT_1_SolveBVP && python -m unittest tests.test_solve_bvp.TestStudentImplementation.test_student_solve_bvp_scipy_wrapper_15pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 15
+    },
+    {
+      "name": "Project 1: Coefficient Functions",
+      "setup": "",
+      "run": "cd PROJECT_1_SolveBVP && python -m unittest tests.test_solve_bvp.TestStudentImplementation.test_student_coefficient_functions -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 15
+    },
+    {
+      "name": "Project 2: Shooting Method - ODE Systems",
+      "setup": "",
+      "run": "cd PROJECT_2_ShootingMethod && python -m unittest tests.test_shooting_method.TestStudentImplementation.test_student_ode_system_shooting_15pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 15
+    },
+    {
+      "name": "Project 2: Shooting Method - scipy ODE System",
+      "setup": "",
+      "run": "cd PROJECT_2_ShootingMethod && python -m unittest tests.test_shooting_method.TestStudentImplementation.test_student_ode_system_scipy_10pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 10
+    },
+    {
+      "name": "Project 2: Shooting Method - Boundary Conditions",
+      "setup": "",
+      "run": "cd PROJECT_2_ShootingMethod && python -m unittest tests.test_shooting_method.TestStudentImplementation.test_student_boundary_conditions_10pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 10
+    },
+    {
+      "name": "Project 2: Shooting Method Implementation",
+      "setup": "",
+      "run": "cd PROJECT_2_ShootingMethod && python -m unittest tests.test_shooting_method.TestStudentImplementation.test_student_shooting_method_40pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 30,
+      "points": 40
+    },
+    {
+      "name": "Project 2: scipy.solve_bvp Wrapper",
+      "setup": "",
+      "run": "cd PROJECT_2_ShootingMethod && python -m unittest tests.test_shooting_method.TestStudentImplementation.test_student_scipy_wrapper_25pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 15,
+      "points": 25
+    },
+    {
+      "name": "Project 2: Method Comparison",
+      "setup": "",
+      "run": "cd PROJECT_2_ShootingMethod && python -m unittest tests.test_shooting_method.TestMethodComparison.test_student_comparison_function_10pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 20,
+      "points": 10
+    },
+    {
+      "name": "Project 2: Error Handling",
+      "setup": "",
+      "run": "cd PROJECT_2_ShootingMethod && python -m unittest tests.test_shooting_method.TestStudentImplementation.test_student_error_handling_5pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 5
+    },
+    {
+      "name": "Project 3: Inverse Square Law Motion - Derivatives Function",
+      "setup": "",
+      "run": "cd PROJECT_3_InverseSquareLawMotion && python -m unittest tests.test_inverse_square_law_motion.TestInverseSquareLawMotion.test_derivatives_function_8pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 8
+    },
+    {
+      "name": "Project 3: Inverse Square Law Motion - Energy Calculation",
+      "setup": "",
+      "run": "cd PROJECT_3_InverseSquareLawMotion && python -m unittest tests.test_inverse_square_law_motion.TestInverseSquareLawMotion.test_calculate_energy_6pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 6
+    },
+    {
+      "name": "Project 3: Inverse Square Law Motion - Angular Momentum",
+      "setup": "",
+      "run": "cd PROJECT_3_InverseSquareLawMotion && python -m unittest tests.test_inverse_square_law_motion.TestInverseSquareLawMotion.test_calculate_angular_momentum_6pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 6
+    },
+    {
+      "name": "Project 3: Inverse Square Law Motion - Orbit Solving",
+      "setup": "",
+      "run": "cd PROJECT_3_InverseSquareLawMotion && python -m unittest tests.test_inverse_square_law_motion.TestInverseSquareLawMotion.test_solve_orbit_15pts -v",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 15,
+      "points": 15
+    },
+    {
+      "name": "Project 4: Derivatives Function",
+      "setup": "pip install -r requirements.txt",
+      "run": "python -m unittest PROJECT_4_DoublePendulumSimulation.tests.test_project_1.TestDoublePendulum.test_derivatives_8pts",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 8
+    },
+    {
+      "name": "Project 4: Double Pendulum Solving",
+      "setup": "pip install -r requirements.txt",
+      "run": "python -m unittest PROJECT_4_DoublePendulumSimulation.tests.test_project_1.TestDoublePendulum.test_solve_double_pendulum_6pts",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 15,
+      "points": 6
+    },
+    {
+      "name": "Project 4: Energy Calculation",
+      "setup": "pip install -r requirements.txt",
+      "run": "python -m unittest PROJECT_4_DoublePendulumSimulation.tests.test_project_1.TestDoublePendulum.test_calculate_energy_4pts",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 4
+    },
+    {
+      "name": "Project 4: Energy Conservation",
+      "setup": "pip install -r requirements.txt",
+      "run": "python -m unittest PROJECT_4_DoublePendulumSimulation.tests.test_project_1.TestDoublePendulum.test_energy_conservation_4pts",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 15,
+      "points": 4
+    },
+    {
+      "name": "Project 4: Code Quality",
+      "setup": "pip install -r requirements.txt",
+      "run": "python -m unittest PROJECT_4_DoublePendulumSimulation.tests.test_project_1.TestDoublePendulum.test_code_quality_1pt",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 1
+    }
+  ]
+}
