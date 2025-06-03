@@ -395,12 +395,14 @@ def run_tests():
     if result.failures:
         print(f"\nFAILURES:")
         for test, traceback in result.failures:
-            print(f"- {test}: {traceback.split('AssertionError: ')[-1].split('\n')[0]}")
+            error_msg = traceback.split('AssertionError: ')[-1].split('\n')[0]
+            print(f"- {test}: {error_msg}")
     
     if result.errors:
         print(f"\nERRORS:")
         for test, traceback in result.errors:
-            print(f"- {test}: {traceback.split('\n')[-2]}")
+            error_msg = traceback.split('\n')[-2]
+            print(f"- {test}: {error_msg}")
     
     # Simple scoring (for GitHub Classroom)
     if STUDENT_AVAILABLE and not REFERENCE_AVAILABLE:
