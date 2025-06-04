@@ -19,7 +19,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-def ode_system_shooting(t, y):
+def ode_system_shooting(y, t):
     """
     Define the ODE system for shooting method.
     
@@ -29,8 +29,8 @@ def ode_system_shooting(t, y):
     y2' = -π(y1+1)/4
     
     Args:
-        t (float): Independent variable (time/position)
         y (array): State vector [y1, y2] where y1=u, y2=u'
+        t (float): Independent variable (time/position)
     
     Returns:
         list: Derivatives [y1', y2']
@@ -305,7 +305,7 @@ def test_ode_system():
     y_test = np.array([1.0, 0.5])
     
     # Test shooting method ODE system
-    dydt = ode_system_shooting(t_test, y_test)
+    dydt = ode_system_shooting(y_test, t_test)
     expected = [0.5, -np.pi*(1.0+1)/4]
     print(f"ODE system (shooting): dydt = {dydt}")
     print(f"Expected: {expected}")
